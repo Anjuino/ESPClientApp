@@ -3,9 +3,9 @@ import os
 import sys
 
 def push_to_repo():
-    print("Pushing changes to shared repository...")
+    print("Добавление локальных файлов в общие файлы библиотек")
     
-    project_path = "C:/ESPClientApp/ESP32ClientApp"  # или другой проект
+    project_path = "C:/ESPClientApp/ESP32ClientApp" 
     libs_path = "C:/ESPClientApp/libs"
     
     # Копируем изменения из include проекта в общий репозиторий
@@ -44,7 +44,5 @@ def push_to_repo():
             shutil.copytree(src_item, dst_item)
             print(f"Updated directory: {item}")
     
-    print("Changes pushed to shared repository!")
-
 if __name__ == "__main__":
     push_to_repo()

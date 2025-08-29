@@ -17,7 +17,7 @@ class Device {
 
       void WebSocketInit();
       void HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length);
-
+      
       uint32_t GetChipId() 
       {
       #ifdef ESP32 

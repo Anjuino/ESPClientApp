@@ -44,39 +44,76 @@ void Device::ParseIncomingMessage(JsonDocument doc, String TypeMesseage)
 
 void Device::UpdateFirmware(uint8_t* data, size_t len) {
     static size_t totalWritten = 0;
+    static bool isFirstPacket = true;
+    static MD5Builder md5;
 
-    if (totalWritten == 0) {
-        //Serial.println("Начинаем OTA...");
+    if (isFirstPacket) {
+        Serial.println("OTA начата");
+        md5.begin();
+        isFirstPacket = false;
+        totalWritten = 0;
+        
         #if defined(ESP8266)
             size_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
             if (!Update.begin(maxSketchSpace)) {
         #else
-            if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {  // Для ESP32
+            if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
         #endif
-            //Serial.println("Не удалось начать OTA!");
+            Serial.println("Ошибка при запуске процесса OTA");
+            SendLog("Ошибка при запуске процесса OTA");
+            isFirstPacket = true;
             return;
         }
     }
 
-    // Запись данных
-    size_t written = Update.write(data, len);
-    if (written != len) {
-        //Serial.printf("Ошибка записи! %d/%d байт\n", written, len);
-        Update.end(false);  // Аварийное завершение
-        totalWritten = 0;
+    // Записываем данные
+    if (Update.write(data, len) != len) {
+        Serial.println("Ошибка при записи");
+        SendLog("Ошибка при записи");
+        Update.end(false);
+        isFirstPacket = true;
         return;
     }
-    totalWritten += written;
 
-    //Serial.printf("Записано: %d байт (всего: %d)\n", written, totalWritten);
+    if (len < 4096) { 
+        size_t dataSize = len - 32;
+        
+        if (dataSize > 0) md5.add(data, dataSize);
+        
+        md5.calculate();
+        String calculated_md5 = md5.toString();
+        
+        String expected_md5;
+        for (int i = 0; i < 32; i++) {
+            expected_md5 += (char)data[dataSize + i];
+        }
 
-    if (len < 4096) {
-        if (Update.end(true)) {
-            delay(10);
-            ESP.restart();
-        } 
-        else Serial.println("Ошибка финализации: " + String(Update.getError()));
+        //Serial.printf("Ожидаемый MD5: %s\n", expected_md5.c_str());
+        //Serial.printf("Вычисленный MD5: %s\n", calculated_md5.c_str());
+        
+        if (calculated_md5 != expected_md5) {
+            Serial.println("MD5 не совпал");
+            SendLog("MD5 не совпал");
+            Update.end(false);
+        } else {
+            //Serial.println("MD5 совпал");
+            if (Update.end(true)) {
+                //Serial.println("OTA успешна");
+                SendLog("OTA успешна");
+                delay(2000);
+                ESP.restart();
+            } else {
+                SendLog("Ошибка при финализации");
+                Serial.println("Ошибка при финализации");
+            }
+        }
+        
+        isFirstPacket = true;
         totalWritten = 0;
+    } else {
+        md5.add(data, len);
+        totalWritten += len;
+        //Serial.printf("Принято: %d байт, Всего: %d байт\n", len, totalWritten);
     }
 }
 
