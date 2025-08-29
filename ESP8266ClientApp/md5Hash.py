@@ -2,10 +2,9 @@ Import("env")
 import hashlib
 import os
 
-def add_md5_to_firmware_footer(source, target, env):
-
+def add_footer_to_firmware(source, target, env):
     firmware_path = target[0].path
-    print(f"Добавляем MD5: {firmware_path}")
+    print(f"Добавляем MD5 и платформу: {firmware_path}")
     
     # Читаем собранную прошивку
     with open(firmware_path, 'rb') as f:
@@ -13,13 +12,24 @@ def add_md5_to_firmware_footer(source, target, env):
     
     # Вычисляем MD5 оригинальной прошивки
     md5_hash = hashlib.md5(firmware_data).hexdigest()
+    
+    # Определяем платформу
+    platform = "ESP8266" if "esp8266" in env['PIOENV'] else "ESP32"
+    
+    # Фиксируем размер платформы - теперь правильно!
+    platform_padded = platform.ljust(7).encode('utf-8')[:7]  # 7 байт для ESP8266
+    
+    # Формируем footer: MD5 + платформа
+    footer = md5_hash.encode('utf-8') + platform_padded
 
-    # Записываем: оригинальная прошивка + MD5
+    # Записываем: оригинальная прошивка + footer
     with open(firmware_path, 'wb') as f:
-        f.write(firmware_data)             # оригинальная прошивка
-        f.write(md5_hash.encode('utf-8'))  # 32 байта MD5 в конце
+        f.write(firmware_data)    # оригинальная прошивка
+        f.write(footer)           # 32 байта MD5 + 7 байт платформа
 
     print(f"Файл обновлен: {firmware_path}")
+    print(f"MD5: {md5_hash}")
+    print(f"Платформа: '{platform}' -> '{platform_padded.decode()}'")
 
 # Добавляем хук после сборки
-env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", add_md5_to_firmware_footer)
+env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", add_footer_to_firmware)

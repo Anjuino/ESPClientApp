@@ -59,8 +59,8 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
         #else
             if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
         #endif
-            Serial.println("Ошибка при запуске процесса OTA");
-            SendLog("Ошибка при запуске процесса OTA");
+            Serial.println("Ошибка при запуске OTA");
+            SendLog("Ошибка при запуске OTA");
             isFirstPacket = true;
             return;
         }
@@ -75,31 +75,64 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
         return;
     }
 
-    if (len < 4096) { 
-        size_t dataSize = len - 32;
+    if (len < 4096) { // Последний пакет
+        // Footer: 32 байта MD5 + 7 байт платформа = 39 байт
+        if (len < 38) {
+            Serial.println("Слишком маленький последний пакет");
+            Update.end(false);
+            isFirstPacket = true;
+            return;
+        }
         
-        if (dataSize > 0) md5.add(data, dataSize);
+        // Извлекаем платформу (последние 7 байт)
+        char platform_buf[8] = {0};
+        memcpy(platform_buf, data + len - 7, 7);
+        String platform = String(platform_buf);
+        platform.trim();
+        
+        char expected_md5[33] = {0};
+        memcpy(expected_md5, data + len - 39, 32);
+        
+        Serial.printf("Полученная платформа: '%s'\n", platform.c_str());
+        Serial.printf("Ожидаемый MD5: %s\n", expected_md5);
+        
+        // Проверяем платформу
+        #if defined(ESP8266)
+            if (platform != "ESP8266") {
+                Serial.println("Прошивка не для ESP8266");
+                SendLog("Прошивка не для ESP8266");
+                Update.end(false);
+                isFirstPacket = true;
+                return;
+            }
+        #else
+            if (platform != "ESP32") {
+                Serial.println("Прошивка не для ESP32");
+                SendLog("Прошивка не для ESP32");
+                Update.end(false);
+                isFirstPacket = true;
+                return;
+            }
+        #endif
+    
+
+        size_t dataSize = len - 39;
+        if (dataSize > 0) {
+            md5.add(data, dataSize);
+        }
         
         md5.calculate();
         String calculated_md5 = md5.toString();
-        
-        String expected_md5;
-        for (int i = 0; i < 32; i++) {
-            expected_md5 += (char)data[dataSize + i];
-        }
-
-        //Serial.printf("Ожидаемый MD5: %s\n", expected_md5.c_str());
-        //Serial.printf("Вычисленный MD5: %s\n", calculated_md5.c_str());
+        Serial.printf("Вычисленный MD5: %s\n", calculated_md5.c_str());
         
         if (calculated_md5 != expected_md5) {
             Serial.println("MD5 не совпал");
             SendLog("MD5 не совпал");
             Update.end(false);
         } else {
-            //Serial.println("MD5 совпал");
+            Serial.println("MD5 совпал");
             if (Update.end(true)) {
-                //Serial.println("OTA успешна");
-                SendLog("OTA успешна");
+                Serial.println("OTA успешна");
                 delay(2000);
                 ESP.restart();
             } else {
@@ -109,11 +142,9 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
         }
         
         isFirstPacket = true;
-        totalWritten = 0;
     } else {
         md5.add(data, len);
         totalWritten += len;
-        //Serial.printf("Принято: %d байт, Всего: %d байт\n", len, totalWritten);
     }
 }
 

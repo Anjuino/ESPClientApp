@@ -5,7 +5,6 @@ import sys
 def sync_libraries():
     print("Синхронизация с внешней библиотекой")
     
-    # Пути (можно изменить под ваши нужды)
     libs_path = "C:/ESPClientApp/libs"
     project_path = os.getcwd()  # Текущая директория
     
