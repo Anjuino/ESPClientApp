@@ -22,7 +22,7 @@ class DeviceLedController: public Device {
 
    public:
 
-      DeviceLedController(uint16_t SettingsAddress) : Device(SettingsAddress) {}
+      DeviceLedController(uint16_t SettingsAddress, WebServer *server) : Device(SettingsAddress, server) {}
       ~DeviceLedController() {};
 
       void Init();

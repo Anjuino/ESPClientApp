@@ -155,7 +155,8 @@ void Device::Init()
 
 void Device::Loop()
 {
-    Client.loop();
+    Client.loop();              // Обработка сообщений от сервера
+    server->handleClient ();    // Обработка сообщений от внетреннго сервера
 }
 
 void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
@@ -171,7 +172,7 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
         case WStype_DISCONNECTED:
         { 
-            Serial.println("Отключился от сервера");
+            //Serial.println("Отключился от сервера");
             break;
         }
 

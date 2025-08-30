@@ -3,7 +3,7 @@ class WIFIManagerSmartHome WIFIManagerSmartHome;
 
 #ifdef ESP32
   #include "Devices/DeviceLedController.h"
-  class DeviceLedController Device(SmartDeviceSettingAddress);
+  class DeviceLedController Device(SmartDeviceSettingAddress, WIFIManagerSmartHome.GetServer());
 #endif
 
 void setup() 

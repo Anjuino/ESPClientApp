@@ -41,7 +41,7 @@ class DeviceTelemetry: public Device {
 
         void AddSensor(SensorBase* Sensor, const String& Type, uint16_t AddressZone);
 
-        DeviceTelemetry(uint16_t SettingsAddress) : Device(SettingsAddress) {}
+        DeviceTelemetry(uint16_t SettingsAddress, ESP8266WebServer *server) : Device(SettingsAddress, server) {}
         ~DeviceTelemetry() {};
 
         void Init();

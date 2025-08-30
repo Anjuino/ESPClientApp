@@ -37,14 +37,19 @@ class WIFIManager {
       virtual void Init(bool IsNeedEEPROM);
       virtual void Start(bool IsNeedEEPROM);
 
-
     public:
 
-        WIFIManager();
-        ~WIFIManager() {};
+      WIFIManager();
+      ~WIFIManager() {};
 
-        void ResetWifiSetting();
+      void ResetWifiSetting();
 
-        void ScanWifi();
-        void GetWifiData();
+      void ScanWifi();
+      void GetWifiData();
+
+      #ifdef ESP32
+        WebServer *GetServer(void) {return &server;};
+      #else
+        ESP8266WebServer *GetServer(void) {return &server;};
+      #endif  
 };

@@ -27,13 +27,22 @@ void WIFIManagerSmartHome::Start(bool IsNeedEEPROM)
 {
     WIFIManager::Start(IsNeedEEPROM);   // Базовое подключение к WIFI сети
 
-    if (strlen(DeviceSmartHomeSetting.Token) != 0) return;
+    StartServer();
+    
+    if (strlen(DeviceSmartHomeSetting.Token) != 0 && strlen(DeviceSmartHomeSetting.ServerIp) != 0) return;
     else {                         
         Serial.println("Запускаю точку доступа");
-        WiFi.softAP("ESP", "password");
-
-        StartServer();
         
+        #ifdef ESP32
+            const char* ApName = "ESP32";
+        #endif
+
+        #ifdef ESP8266
+            const char* ApName = "ESP8266";
+        #endif
+
+        WiFi.softAP(ApName, "password");
+
         while(true) {
             server.handleClient ();
             delay(0);

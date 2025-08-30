@@ -4,6 +4,14 @@
 #include "OTA/OTA.h"
 #include "ArduinoJson.h"
 
+#ifdef ESP32
+  #include <WiFi.h>
+  #include <WebServer.h>
+#else
+  #include <ESP8266WiFi.h>
+  #include "ESP8266WebServer.h"
+#endif
+
 class Device {
    
    private:
@@ -14,6 +22,12 @@ class Device {
       const char* USER       = "Anjey";
 
       WebSocketsClient Client;
+
+      #ifdef ESP32
+        WebServer *server = NULL;
+      #else
+        ESP8266WebServer *server = NULL;
+      #endif
 
       void WebSocketInit();
       void HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length);
@@ -30,7 +44,22 @@ class Device {
    public:
       uint16_t SettingsAddress = 0;
 
-      Device (uint16_t SettingsAddress)  {this->SettingsAddress = SettingsAddress;};
+      #ifdef ESP32
+
+        Device (uint16_t SettingsAddress, WebServer *server)  
+        {
+          this->SettingsAddress = SettingsAddress;
+          this->server = server;
+        };
+
+      #else
+        Device (uint16_t SettingsAddress, ESP8266WebServer *server)  
+        {
+          this->SettingsAddress = SettingsAddress;
+          this->server = server;
+        };
+      #endif
+
       ~Device() {};
 
       void Init();

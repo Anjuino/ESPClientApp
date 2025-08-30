@@ -53,7 +53,16 @@ void WIFIManager::Start(bool IsNeedEEPROM)
     // Не смог подключится к сети. Создаю точку доступа и запускаю сервер
     if (!IsConnect) {
         Serial.println("Запускаю точку доступа");
-        WiFi.softAP("ESP", "password");
+        
+        #ifdef ESP32
+            const char* ApName = "ESP32";
+        #endif
+
+        #ifdef ESP8266
+            const char* ApName = "ESP8266";
+        #endif
+
+        WiFi.softAP(ApName, "password");
 
         StartServer();
         

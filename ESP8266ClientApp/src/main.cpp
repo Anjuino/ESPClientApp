@@ -3,7 +3,7 @@ class WIFIManagerSmartHome WIFIManagerSmartHome;
 
 #ifdef ESP8266
   #include "Devices/DeviceTelemetry.h"
-  class DeviceTelemetry Device(SmartDeviceSettingAddress);
+  class DeviceTelemetry Device(SmartDeviceSettingAddress, WIFIManagerSmartHome.GetServer());
 #endif
 
 void setup() 
