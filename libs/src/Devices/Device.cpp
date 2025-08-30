@@ -172,7 +172,7 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
         case WStype_DISCONNECTED:
         { 
-            //Serial.println("Отключился от сервера");
+            Serial.println("Отключился от сервера");
             break;
         }
 

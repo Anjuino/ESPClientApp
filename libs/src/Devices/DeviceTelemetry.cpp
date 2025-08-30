@@ -39,6 +39,7 @@ void DeviceTelemetry::AppStart()
     doc["TypeMesseage"] = "Authentication";
     doc["Token"]        = DeviceSmartHomeSetting.Token;
     doc["TypeDevice"]   = "Telemetry";
+    doc["Build"]        = build;
 
     SendMesseageToServer(doc);
 }

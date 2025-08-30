@@ -36,12 +36,13 @@ void DeviceLedController::AppStart()
       char ServerIp[15];
    } DeviceSmartHomeSetting;
 
-    EEPROM.get(SettingsAddress, DeviceSmartHomeSetting);
+   EEPROM.get(SettingsAddress, DeviceSmartHomeSetting);
 
    // Заполняем объект данными
    doc["TypeMesseage"] = "Authentication";
    doc["Token"]        = DeviceSmartHomeSetting.Token;
    doc["TypeDevice"]   = "LedController";
+   doc["Build"]        = build;
 
    SendMesseageToServer(doc);
 }

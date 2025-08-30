@@ -3,6 +3,7 @@
 #include <WebSocketsClient.h>
 #include "OTA/OTA.h"
 #include "ArduinoJson.h"
+#include "Config/build.h"
 
 #ifdef ESP32
   #include <WiFi.h>
