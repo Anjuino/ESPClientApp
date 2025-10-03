@@ -5,7 +5,7 @@ import sys
 def push_to_repo():
     print("Добавление локальных файлов в общие файлы библиотек")
     
-    project_path = "C:/ESPClientApp/ESP32ClientApp" 
+    project_path = os.getcwd()  # Текущая директория
     libs_path = "C:/ESPClientApp/libs"
     
     # Копируем изменения из include проекта в общий репозиторий

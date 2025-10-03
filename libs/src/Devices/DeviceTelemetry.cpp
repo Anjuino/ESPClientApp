@@ -18,17 +18,9 @@ void DeviceTelemetry::AppStart()
 {
     JsonDocument doc;
 
-    struct{
-        bool SettingIsEmpty;
-        char Token[20];
-        char ServerIp[15];
-    } DeviceSmartHomeSetting;
-
-    EEPROM.get(SettingsAddress, DeviceSmartHomeSetting);
-
     // Заполняем объект данными
     doc["TypeMesseage"] = "Authentication";
-    doc["Token"]        = DeviceSmartHomeSetting.Token;
+    doc["Token"]        = Settings.Token;
     doc["TypeDevice"]   = "Telemetry";
     doc["Build"]        = build;
 

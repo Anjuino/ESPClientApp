@@ -36,6 +36,14 @@ class Device {
       #endif  
       }
 
+      struct DeviceSmartHomeSetting{
+        bool SettingIsEmpty;
+        char Token[20];
+      };
+
+    protected:
+      DeviceSmartHomeSetting Settings;
+
    public:
       uint16_t SettingsAddress = 0;
 

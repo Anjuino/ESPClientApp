@@ -44,6 +44,7 @@ void Device::ParseIncomingMessage(JsonDocument doc, String TypeMesseage)
 
 void Device::UpdateFirmware(uint8_t* data, size_t len) {
     // добавить запрос следующего пакета прошивки
+    // добавить пингование сервера вручную
     static size_t totalWritten = 0;
     static bool isFirstPacket = true;
     static MD5Builder md5;
@@ -151,13 +152,14 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
 
 void Device::Init()
 {   
+    EEPROM.get(SettingsAddress, Settings);
     WebSocketInit();
 }
 
 void Device::Loop()
 {
     Client.loop();              // Обработка сообщений от сервера
-    server->handleClient ();    // Обработка сообщений от внутреннго сервера
+    server->handleClient ();    // Обработка сообщений от внутреннего сервера
 }
 
 void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)

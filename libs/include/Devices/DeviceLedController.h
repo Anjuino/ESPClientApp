@@ -4,7 +4,6 @@
 #include "Led/WS2812.h"
 
 #define AddressSettings 120       // Адрес настроек настроек для eeprom
-
 #define SensorDetectedMove false
 
 class DeviceLedController: public Device {
