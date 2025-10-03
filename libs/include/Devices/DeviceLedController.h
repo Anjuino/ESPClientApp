@@ -1,4 +1,4 @@
-#ifdef ESP32
+#if defined ESP32 && defined LED_CONTROLLER
 #pragma once
 #include "Device.h"
 #include "Led/WS2812.h"

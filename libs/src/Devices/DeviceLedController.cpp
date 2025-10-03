@@ -1,4 +1,4 @@
-#ifdef ESP32
+#if defined ESP32 && defined LED_CONTROLLER
 #include "Devices/DeviceLedController.h"
 
 TaskHandle_t Led_task;

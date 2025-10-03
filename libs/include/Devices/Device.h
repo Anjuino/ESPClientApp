@@ -16,12 +16,6 @@
 class Device {
    
    private:
-      const char* Gate = "/ws";
-      uint16_t PORT = 7777;
-
-      const char* SECRET_KEY = "Mesn72154_";
-      const char* USER       = "Anjey";
-
       WebSocketsClient Client;
 
       #ifdef ESP32

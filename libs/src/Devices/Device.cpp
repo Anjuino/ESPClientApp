@@ -43,6 +43,7 @@ void Device::ParseIncomingMessage(JsonDocument doc, String TypeMesseage)
 }
 
 void Device::UpdateFirmware(uint8_t* data, size_t len) {
+    // добавить запрос следующего пакета прошивки
     static size_t totalWritten = 0;
     static bool isFirstPacket = true;
     static MD5Builder md5;
@@ -156,7 +157,7 @@ void Device::Init()
 void Device::Loop()
 {
     Client.loop();              // Обработка сообщений от сервера
-    server->handleClient ();    // Обработка сообщений от внетреннго сервера
+    server->handleClient ();    // Обработка сообщений от внутреннго сервера
 }
 
 void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
@@ -202,21 +203,13 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
 void Device::WebSocketInit()
 {
-    struct{
-        bool SettingIsEmpty;
-        char Token[20];
-        char ServerIp[15];
-    } DeviceSmartHomeSetting;
-
-    EEPROM.get(SettingsAddress, DeviceSmartHomeSetting);
-
-    Client.begin(DeviceSmartHomeSetting.ServerIp, PORT, Gate);
+    Client.begin("SmartHome.local", 7777, "/ws");
 
     Client.onEvent([this](WStype_t type, uint8_t* payload, size_t length) {
         this->HandlerWebSocket(type, payload, length);  // Вызов метода класса
     });
 
-    Client.setAuthorization(USER, SECRET_KEY);
+    Client.setAuthorization("Anjey", "Mesn72154_");
 
     Client.setReconnectInterval(10000);
 }
