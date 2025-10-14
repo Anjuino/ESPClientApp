@@ -4,5 +4,5 @@
 .vscode/launch.json
 .vscode/ipch
 include/
-!src/main.cpp
 src/*
+!src/main.cpp
