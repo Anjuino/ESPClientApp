@@ -24,6 +24,8 @@ class DeviceTelemetry: public Device {
         std::vector<SensorInfo> Sensors;
     
         void AppStart() override;
+
+        uint64_t Timer = millis() + 60000;
         
    public:
 
@@ -38,7 +40,7 @@ class DeviceTelemetry: public Device {
         
         void ParseIncomingMessage(JsonDocument doc, String TypeMesseage) override;
 
-        void SendState();
+        void SendState(bool ToDataBase = false);
 
 };
 

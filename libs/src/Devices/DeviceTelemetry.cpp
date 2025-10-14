@@ -45,10 +45,12 @@ void DeviceTelemetry::AddSensor(SensorBase* Sensor, const String& Type)
 }
 
 
-void DeviceTelemetry::SendState()
+void DeviceTelemetry::SendState(bool ToDataBase)
 {
     JsonDocument doc;
     doc["TypeMesseage"] = "State";
+
+    if(ToDataBase) doc["ToDataBase"] = ToDataBase; 
 
     JsonObject zoneObj;
     JsonArray ZonesArray = doc.createNestedArray("Data");
@@ -69,6 +71,11 @@ void DeviceTelemetry::SendState()
 void DeviceTelemetry::Loop()
 {
     Device::Loop();
+
+    if(Timer < millis()) {
+        Timer = 60 * 20 * 1000;
+        SendState(true);
+    }
 }
 
 #endif
