@@ -27,10 +27,7 @@ void Device::RequestFirmware()
     JsonDocument doc;
 
     // Заполняем объект данными
-    char Token[20];
-    EEPROM.get(SettingsAddress, Token);
-    
-    doc["Token"]        = Token;
+    doc["Token"]        = Settings.Token;
     doc["TypeMesseage"] = "GetFirmware";
 
     SendMesseageToServer(doc);
@@ -205,7 +202,9 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
 void Device::WebSocketInit()
 {
-    Client.begin("SmartHome.local", 7777, "/ws");
+    //Client.beginSSL("orangepi.tail322823.ts.net", 443, "/lowPowerTest/ws", "", "arduino");
+    
+    Client.begin(Settings.ServerIp, 7777, "/ws");
 
     Client.onEvent([this](WStype_t type, uint8_t* payload, size_t length) {
         this->HandlerWebSocket(type, payload, length);  // Вызов метода класса

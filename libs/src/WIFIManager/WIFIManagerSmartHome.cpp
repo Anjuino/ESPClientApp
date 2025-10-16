@@ -18,6 +18,8 @@ void WIFIManagerSmartHome::Init(bool IsNeedEEPROM)
     }
 
     Serial.println(DeviceSmartHomeSetting.Token);
+    Serial.println(DeviceSmartHomeSetting.ServerIp);
+
 }
 
 void WIFIManagerSmartHome::Start(bool IsNeedEEPROM)
@@ -26,7 +28,7 @@ void WIFIManagerSmartHome::Start(bool IsNeedEEPROM)
 
     StartServer();
     
-    if (strlen(DeviceSmartHomeSetting.Token) != 0) return;
+    if (strlen(DeviceSmartHomeSetting.Token) != 0 && strlen(DeviceSmartHomeSetting.ServerIp) != 0) return;
     else {                         
         Serial.println("Запускаю точку доступа");
         
@@ -52,16 +54,22 @@ void WIFIManagerSmartHome::RegDeviceData(bool IsNeedRestart)
     WIFIManager::RegDeviceData(false);
 
     String Token = server.arg ("Token");
-    Serial.println(Token);
+    String Ip = server.arg("Ip");
 
-    if (Token.length() < sizeof(DeviceSmartHomeSetting.Token)) {
+    Serial.println(Token);
+    Serial.println(Ip);
+
+    if (Token.length() < sizeof(DeviceSmartHomeSetting.Token) && 
+        Ip.length() < sizeof(DeviceSmartHomeSetting.ServerIp)) {
         
         if (Token.length() != 0) Token.toCharArray(DeviceSmartHomeSetting.Token, sizeof(DeviceSmartHomeSetting.Token));
+        if (Ip.length() != 0) Ip.toCharArray(DeviceSmartHomeSetting.ServerIp, sizeof(DeviceSmartHomeSetting.ServerIp));
 
         EEPROM.put(SmartDeviceSettingAddress, DeviceSmartHomeSetting);
         EEPROM.commit();
         
         Serial.println(DeviceSmartHomeSetting.Token);
+        Serial.println(DeviceSmartHomeSetting.ServerIp);
 
         delay(100);
         if (IsNeedRestart) ESP.restart();
@@ -79,6 +87,15 @@ void WIFIManagerSmartHome::ResetSettings()
     EEPROM.commit();
 }
 
+void WIFIManagerSmartHome::GetIpServer()
+{
+    String JSONAnswer = "{";
+    JSONAnswer += "\"Ip\":\"" + String(DeviceSmartHomeSetting.ServerIp) + "\"}";
+
+    server.send(200, "application/json", JSONAnswer);
+}
+
+
 void WIFIManagerSmartHome::GetToken()
 {
     String JSONAnswer = "{";
@@ -91,5 +108,6 @@ void WIFIManagerSmartHome::StartServer()
 {
     WIFIManager::StartServer();
 
+    server.on("/GetIpServer", [this]() {GetIpServer();});   
     server.on("/GetToken", [this]() {GetToken();});     
 }

@@ -48,9 +48,9 @@ void DeviceTelemetry::AddSensor(SensorBase* Sensor, const String& Type)
 void DeviceTelemetry::SendState(bool ToDataBase)
 {
     JsonDocument doc;
-    doc["TypeMesseage"] = "State";
 
-    if(ToDataBase) doc["ToDataBase"] = ToDataBase; 
+    if(ToDataBase) doc["TypeMesseage"] = "ToDataBase"; 
+    else           doc["TypeMesseage"] = "State";
 
     JsonObject zoneObj;
     JsonArray ZonesArray = doc.createNestedArray("Data");

@@ -3,7 +3,7 @@ inline const char build[] = "1.0.1.16";
 #endif
 
 #ifdef ESP8266
-inline const char build[] = "1.0.2.41";
+inline const char build[] = "1.0.2.48";
 #endif
 
 

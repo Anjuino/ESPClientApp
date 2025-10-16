@@ -21,12 +21,14 @@ const char Index[] PROGMEM = R"=(
     <form id="TgBotForm">
       <label for="Token">Токен:</label><br>
       <input type="text" id="Token" name="Token"><br><br>
+      <label for="Ip">Ip:</label><br>
+      <input type="text" id="Ip" name="Ip"><br><br>
     </form>
 		<button type="button" onclick="configureWifi()">Сохранить</button>
 	</div>		
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      Promise.all([ScanWifi(), GetToken(), GetWifiData()])
+      Promise.all([GetWifiData(), ScanWifi(), GetToken(), GetIp()])
         .then(() => {
           document.getElementById('loading').style.display = 'none';
           document.getElementById('content').style.display = 'block';
@@ -103,6 +105,18 @@ const char Index[] PROGMEM = R"=(
       })
     }
 
+    function GetIp() {
+      const Ip = document.getElementById('Ip');
+      
+      return fetch(`/GetIpServer`)
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        Ip.value = data.Ip;
+      })
+    }
 
     function configureWifi() {
       let ssid;
@@ -116,6 +130,7 @@ const char Index[] PROGMEM = R"=(
 
       const password = document.getElementById('password').value;
       const token = document.getElementById('Token').value;
+      const ip = document.getElementById('Ip').value;
 
       var IsDataInput = true;
 
@@ -134,7 +149,12 @@ const char Index[] PROGMEM = R"=(
         alert("Введите токен")
       }
 
-      if (IsDataInput) fetch(`/RegDeviceData?SSID=${ssid}&Password=${password}&Token=${token}`);
+      if (!ip) {
+        IsDataInput = false;
+        alert("Введите ip")
+      }
+
+      if (IsDataInput) fetch(`/RegDeviceData?SSID=${ssid}&Password=${password}&Token=${token}&Ip=${ip}`);
     }
   </script>
 </body>
