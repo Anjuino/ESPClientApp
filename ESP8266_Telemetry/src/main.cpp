@@ -14,6 +14,7 @@ void setup()
   WIFIManagerSmartHome.Start(false);
 
   Device.Init();
+
 }
 
 void loop() 

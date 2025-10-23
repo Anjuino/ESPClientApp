@@ -3,6 +3,7 @@
 #include "Devices/DeviceTelemetry.h"
 
 #include "Sensors/ENS160Sensor.h"
+#include "Sensors/BME280Sensor.h"
 #include "Sensors/AHTSensor.h"
 
 void DeviceTelemetry::ParseIncomingMessage(JsonDocument doc, String TypeMesseage)
@@ -31,9 +32,9 @@ void DeviceTelemetry::Init()
 {
     Device::Init();
 
-    AddSensor(static_cast<SensorT*>(new AHTSensor()),      SensorTypes::Temperature);
-    AddSensor(static_cast<SensorH*>(new AHTSensor()),      SensorTypes::Humidity);
-    AddSensor(static_cast<SensorCO2*>(new ENS160Sensor()), SensorTypes::CO2);
+    AddSensor(static_cast<SensorT*>(new BME280Sensor()),    SensorTypes::Temperature);
+    AddSensor(static_cast<SensorH*>(new BME280Sensor()),    SensorTypes::Humidity);
+    AddSensor(static_cast<SensorCO2*>(new ENS160Sensor()),  SensorTypes::CO2);
 }
 
 

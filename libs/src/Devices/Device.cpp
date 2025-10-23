@@ -202,9 +202,11 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
 void Device::WebSocketInit()
 {
-    //Client.beginSSL("orangepi.tail322823.ts.net", 443, "/lowPowerTest/ws", "", "arduino");
+    Client.beginSSL("orangepi.tail322823.ts.net", 443, "/smarthome/ws", nullptr, "arduino");
     
-    Client.begin(Settings.ServerIp, 7777, "/ws");
+    //Client.begin(Settings.ServerIp, 7777, "/ws");
+    
+    Client.enableHeartbeat(20000, 10000, 2); // ping каждые 20 сек, timeout 10 сек
 
     Client.onEvent([this](WStype_t type, uint8_t* payload, size_t length) {
         this->HandlerWebSocket(type, payload, length);  // Вызов метода класса
@@ -212,5 +214,5 @@ void Device::WebSocketInit()
 
     Client.setAuthorization("Anjey", "Mesn72154_");
 
-    Client.setReconnectInterval(10000);
+    Client.setReconnectInterval(2000);
 }
