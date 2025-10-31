@@ -4,7 +4,7 @@
 TaskHandle_t Led_task;
 void DeviceLedController::LedCode(void *pvParameters) {
    DeviceLedController* controller = (DeviceLedController*)pvParameters;
-   controller->Led.Init(AddressSettings, 27, SensorDetectedMove);
+   controller->Led.Init(AddressSettings, 26, SensorDetectedMove);
    
    while (true) {
       controller->Led.Loop();
