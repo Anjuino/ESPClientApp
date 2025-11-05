@@ -43,7 +43,7 @@ void DeviceLedController::Init()
 {
    Device::Init();
 
-   xTaskCreatePinnedToCore(LedCode, "LedCode", 1024 * 25, this, 4, &Led_task, 0);
+   xTaskCreatePinnedToCore(LedCode, "LedCode", 1024 * 16, this, 4, &Led_task, 1);
 }
 
 void DeviceLedController::SetState(JsonDocument doc)
