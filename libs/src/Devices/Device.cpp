@@ -11,6 +11,14 @@ void Device::SendLog(String Log)
     SendMesseageToServer(doc);
 }
 
+void Device::RequestNextFirmwarePacket() {
+    Serial.println("Запрос следующего пакета");
+    JsonDocument doc;
+    doc["TypeMesseage"] = "NextFirmwarePacket";
+    
+    SendMesseageToServer(doc);
+}
+
 void Device::SendMesseageToServer(JsonDocument doc)
 {   
     doc["ChipId"]       = GetChipId();
@@ -144,6 +152,10 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
     } else {
         md5.add(data, len);
         totalWritten += len;
+
+        RequestNextFirmwarePacket();
+
+        Client.sendPing();
     }
 }
 
@@ -178,7 +190,14 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
         case WStype_PING:
         {
-            //Serial.println("Пинг");
+            Serial.println("Пинг");
+            Client.sendPing();
+            break;
+        }
+        
+        case WStype_PONG:
+        {
+            Serial.println("Получил pong от сервера");
             break;
         }
 

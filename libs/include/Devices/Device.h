@@ -76,5 +76,6 @@ class Device {
       void SendLog(String Log);
       void UpdateFirmware(uint8_t* data, size_t len);
       void RequestFirmware();
+      void RequestNextFirmwarePacket();
 };
 
