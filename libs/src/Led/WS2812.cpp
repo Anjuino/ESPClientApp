@@ -75,7 +75,7 @@ void WS2812::RainbowCycle(uint8_t wait) {
       Led.setPixelColor(i, Wheel (((i * 256 / Led.numPixels ()) + z) & 255));
    }
 
-   delay (20 - wait);
+   vTaskDelay(pdMS_TO_TICKS(20 - wait));
    Led.show ();
    z++;
 
@@ -89,7 +89,7 @@ void WS2812::RandomLight(uint8_t wait)
    Led.setPixelColor (RandNumPix, Led.Color (random (256), random (256), random (256)));
    Led.show (); 
 
-   delay (120 - (wait*4)); 
+   vTaskDelay(pdMS_TO_TICKS(120 - (wait*4))); 
 
    Led.setPixelColor (RandNumPix, Led.Color (0, 0, 0)); 
    Led.show (); 
@@ -110,7 +110,8 @@ void WS2812::RGBLoop(uint8_t wait)
          case 4: SetColor (Blind,0,Blind); break;
          case 5: SetColor (Blind,Blind,0); break;
       }
-      delay (23 - wait);
+
+      vTaskDelay(pdMS_TO_TICKS(23 - wait)); 
       Blind++;
 
       if (Blind == 255) IsUp = false;
@@ -125,7 +126,8 @@ void WS2812::RGBLoop(uint8_t wait)
          case 4: SetColor (Blind,0,Blind); break;
          case 5: SetColor (Blind,Blind,0); break;
       }
-      delay (23 - wait);
+
+      vTaskDelay(pdMS_TO_TICKS(23 - wait)); 
       Blind--;
 
       if (Blind == 0) {
@@ -142,10 +144,10 @@ void WS2812::Sparkle(uint8_t red, uint8_t green, uint8_t blue, uint8_t wait)
   int Pixel = random(Led.numPixels ());
   Led.setPixelColor(Pixel,255,255,255);
   Led.show();
-  delay(20);
+  vTaskDelay(pdMS_TO_TICKS(20)); 
   Led.setPixelColor(Pixel,red,green,blue);
   Led.show();
-  delay(1000 - (45*wait));
+  vTaskDelay(pdMS_TO_TICKS(1000 - (45 * wait))); 
 }
 
 void WS2812::RunColor (uint8_t wait) 
@@ -157,7 +159,7 @@ void WS2812::RunColor (uint8_t wait)
    Led.setPixelColor (posUp, Led.Color (r1, g1, b1));
    posUp++;
 
-   delay (81 - (wait*4)); 
+   vTaskDelay(pdMS_TO_TICKS(81 - (4 * wait)));  
 
    Led.setPixelColor (posDown, Led.Color (r2, g2, b2)); 
    posDown--;
@@ -192,7 +194,7 @@ void WS2812::RunningLights (uint8_t red, uint8_t green, uint8_t blue, uint32_t w
    }
 
    Led.show ();
-   delay (70 - wait);
+   vTaskDelay(pdMS_TO_TICKS(70 - wait));  
 
    j++;
    if (j == (Led.numPixels ()*2)) {
@@ -213,7 +215,8 @@ void WS2812::RunStr (uint32_t wait)
    Led.setPixelColor (pos + 2, Led.Color (State.r, State.g, State.b)); 
    Led.show (); 
 
-   delay (81 - (wait*4)); 
+   vTaskDelay(pdMS_TO_TICKS(81 - (4 * wait)));  
+
    Led.setPixelColor (pos - 2, Led.Color (0, 0, 0)); 
    Led.setPixelColor (pos - 1, Led.Color (0, 0, 0)); 
    Led.setPixelColor (pos, Led.Color (0, 0, 0)); 
@@ -245,7 +248,7 @@ void WS2812::RunStr2 (uint32_t wait)
 
    Led.show (); 
 
-   delay (81 - (wait*4)); 
+   vTaskDelay(pdMS_TO_TICKS(81 - (4 * wait)));  
 
    Led.setPixelColor (pos - 1, Led.Color (0, 0, 0)); 
    Led.setPixelColor (pos, Led.Color (0, 0, 0)); 
@@ -293,7 +296,7 @@ void WS2812::Chaos(uint32_t wait)
       if (randcolor == 9) Led.setPixelColor (i, random (256), random (128), random (128));
    }
    Led.show ();
-   delay (300 - wait*10);
+   vTaskDelay(pdMS_TO_TICKS(300 - (10 * wait)));  
 }
 
 void WS2812::SetState(LedMode Mode) 

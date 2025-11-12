@@ -4,11 +4,11 @@
 TaskHandle_t Led_task;
 void DeviceLedController::LedCode(void *pvParameters) {
    DeviceLedController* controller = (DeviceLedController*)pvParameters;
-   controller->Led.Init(AddressSettings, 26, SensorDetectedMove);
+   controller->Led.Init(AddressSettings, 27, SensorDetectedMove);
    
    while (true) {
       controller->Led.Loop();
-      delay(1);
+      vTaskDelay(10);
    }
 }
 
@@ -42,8 +42,8 @@ void DeviceLedController::AppStart()
 void DeviceLedController::Init()
 {
    Device::Init();
-
-   xTaskCreatePinnedToCore(LedCode, "LedCode", 1024 * 16, this, 4, &Led_task, 1);
+   Led.Init(AddressSettings, 27, SensorDetectedMove);
+   //xTaskCreatePinnedToCore(LedCode, "LedCode", 1024 * 20, this, 10, &Led_task, 1);
 }
 
 void DeviceLedController::SetState(JsonDocument doc)
@@ -185,6 +185,8 @@ void DeviceLedController::SendState()
 void DeviceLedController::Loop()
 {
    Device::Loop();
+
+   Led.Loop();
 }
 
 #endif
