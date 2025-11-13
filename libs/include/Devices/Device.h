@@ -18,6 +18,10 @@ class Device {
    private:
       WebSocketsClient Client;
 
+      size_t totalWritten = 0;
+      bool isFirstPacket = true;
+      MD5Builder md5;
+
       #ifdef ESP32
         WebServer *server = NULL;
       #else
@@ -77,5 +81,7 @@ class Device {
       void UpdateFirmware(uint8_t* data, size_t len);
       void RequestFirmware();
       void RequestNextFirmwarePacket();
+      void SendOtaFinish();
+      void ResetOtaUpdate();
 };
 

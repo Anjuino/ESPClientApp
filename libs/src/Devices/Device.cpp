@@ -12,9 +12,15 @@ void Device::SendLog(String Log)
 }
 
 void Device::RequestNextFirmwarePacket() {
-    Serial.println("Запрос следующего пакета");
     JsonDocument doc;
     doc["TypeMesseage"] = "NextFirmwarePacket";
+    
+    SendMesseageToServer(doc);
+}
+
+void Device::SendOtaFinish() {
+    JsonDocument doc;
+    doc["TypeMesseage"] = "OtaFinish";
     
     SendMesseageToServer(doc);
 }
@@ -47,13 +53,17 @@ void Device::ParseIncomingMessage(JsonDocument doc, String TypeMesseage)
     if(TypeMesseage == "Reboot")   ESP.restart();
 }
 
-void Device::UpdateFirmware(uint8_t* data, size_t len) {
-    // добавить запрос следующего пакета прошивки
-    // добавить пингование сервера вручную
-    static size_t totalWritten = 0;
-    static bool isFirstPacket = true;
-    static MD5Builder md5;
 
+void Device::ResetOtaUpdate() {
+    if (!isFirstPacket) {
+        Update.end(false);
+        isFirstPacket = true;
+        totalWritten = 0;
+        md5.begin();
+    }
+}
+
+void Device::UpdateFirmware(uint8_t* data, size_t len) {
     if (isFirstPacket) {
         Serial.println("OTA начата");
         md5.begin();
@@ -68,7 +78,7 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
         #endif
             Serial.println("Ошибка при запуске OTA");
             SendLog("Ошибка при запуске OTA");
-            isFirstPacket = true;
+            ResetOtaUpdate();  
             return;
         }
     }
@@ -77,17 +87,15 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
     if (Update.write(data, len) != len) {
         Serial.println("Ошибка при записи");
         SendLog("Ошибка при записи");
-        Update.end(false);
-        isFirstPacket = true;
+        ResetOtaUpdate();  
         return;
     }
 
-    if (len < 4096) { // Последний пакет
+    if (len < 2048) { // Последний пакет
         // Footer: 32 байта MD5 + 7 байт платформа = 39 байт
         if (len < 38) {
             Serial.println("Слишком маленький последний пакет");
-            Update.end(false);
-            isFirstPacket = true;
+            ResetOtaUpdate();  
             return;
         }
         
@@ -108,16 +116,14 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
             if (platform != "ESP8266") {
                 Serial.println("Прошивка не для ESP8266");
                 SendLog("Прошивка не для ESP8266");
-                Update.end(false);
-                isFirstPacket = true;
+                ResetOtaUpdate();  
                 return;
             }
         #else
             if (platform != "ESP32") {
                 Serial.println("Прошивка не для ESP32");
                 SendLog("Прошивка не для ESP32");
-                Update.end(false);
-                isFirstPacket = true;
+                ResetOtaUpdate();  
                 return;
             }
         #endif
@@ -135,27 +141,24 @@ void Device::UpdateFirmware(uint8_t* data, size_t len) {
         if (calculated_md5 != expected_md5) {
             Serial.println("MD5 не совпал");
             SendLog("MD5 не совпал");
-            Update.end(false);
         } else {
             Serial.println("MD5 совпал");
             if (Update.end(true)) {
+                SendOtaFinish();
                 Serial.println("OTA успешна");
-                delay(2000);
+                delay(5000);
                 ESP.restart();
             } else {
                 SendLog("Ошибка при финализации");
                 Serial.println("Ошибка при финализации");
             }
         }
-        
-        isFirstPacket = true;
+        ResetOtaUpdate();  
     } else {
         md5.add(data, len);
         totalWritten += len;
 
         RequestNextFirmwarePacket();
-
-        Client.sendPing();
     }
 }
 
@@ -177,6 +180,7 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
         case WStype_CONNECTED:
         {
             Serial.println("Подключился к серверу");
+            ResetOtaUpdate();  
             delay(100);
             AppStart();
             break;
@@ -185,19 +189,18 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
         case WStype_DISCONNECTED:
         { 
             Serial.println("Отключился от сервера");
+            ResetOtaUpdate(); 
             break;
         }
 
         case WStype_PING:
         {
-            Serial.println("Пинг");
             Client.sendPing();
             break;
         }
         
         case WStype_PONG:
         {
-            Serial.println("Получил pong от сервера");
             break;
         }
 
@@ -225,7 +228,7 @@ void Device::WebSocketInit()
     
     //Client.begin(Settings.ServerIp, 7777, "/ws");
     
-    Client.enableHeartbeat(20000, 10000, 2); // ping каждые 20 сек, timeout 10 сек
+    //Client.enableHeartbeat(30000, 25000, 5); // ping каждые 30 сек, timeout 25 сек
 
     Client.onEvent([this](WStype_t type, uint8_t* payload, size_t length) {
         this->HandlerWebSocket(type, payload, length);  // Вызов метода класса
