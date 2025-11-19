@@ -228,7 +228,7 @@ void Device::WebSocketInit()
     
     //Client.begin(Settings.ServerIp, 7777, "/ws");
     
-    //Client.enableHeartbeat(30000, 25000, 5); // ping каждые 30 сек, timeout 25 сек
+    Client.enableHeartbeat(30000, 25000, 5); // ping каждые 30 сек, timeout 25 сек
 
     Client.onEvent([this](WStype_t type, uint8_t* payload, size_t length) {
         this->HandlerWebSocket(type, payload, length);  // Вызов метода класса
