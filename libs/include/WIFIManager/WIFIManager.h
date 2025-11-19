@@ -8,7 +8,7 @@
 
 #include <EEPROM.h>
 
-#include "webPage/index.h"
+#include "webPage/Index.h"
 #include "webPage/css.h"
 
 #define WifiSettingAddress 0                // Адрес настроек для eeprom

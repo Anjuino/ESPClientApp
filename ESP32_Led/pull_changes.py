@@ -5,9 +5,10 @@ import sys
 def sync_libraries():
     print("Синхронизация с внешней библиотекой")
     
-    # Пути (можно изменить под ваши нужды)
-    libs_path = "C:/ESPClientApp/libs"
-    project_path = os.getcwd()  # Текущая директория
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_path = script_dir
+    parent_path = os.path.dirname(project_path)
+    libs_path = os.path.join(parent_path, "libs")
     
     # Проверяем существование исходной директории с библиотеками
     if not os.path.exists(libs_path):
