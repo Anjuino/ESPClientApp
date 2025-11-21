@@ -49,12 +49,26 @@ void Device::RequestFirmware()
 
 void Device::ParseIncomingMessage(JsonDocument doc, String TypeMesseage)
 {
-    if(TypeMesseage == "StartOTA") RequestFirmware();
-    if(TypeMesseage == "Reboot")   ESP.restart();
+    if(TypeMesseage == "StartOTA")      RequestFirmware();
+    if(TypeMesseage == "Reboot")        ESP.restart();
+    if(TypeMesseage == "UpdateToken")   UpdateToken(doc);
 }
 
+void Device::UpdateToken(JsonDocument doc)
+{
+    if (doc.containsKey("Token") && doc["Token"].is<int>()) {
+        const char* tokenStr = doc["Token"];
+        strncpy(Settings.Token, tokenStr, sizeof(Settings.Token) - 1);
+        Settings.Token[sizeof(Settings.Token) - 1] = '\0';
+        EEPROM.put(SettingsAddress, Settings);
+        EEPROM.commit();
+        delay(1000);
+        ESP.restart();
+    }
+}
 
-void Device::ResetOtaUpdate() {
+void Device::ResetOtaUpdate() 
+{
     if (!isFirstPacket) {
         Update.end(false);
         isFirstPacket = true;
@@ -63,7 +77,8 @@ void Device::ResetOtaUpdate() {
     }
 }
 
-void Device::UpdateFirmware(uint8_t* data, size_t len) {
+void Device::UpdateFirmware(uint8_t* data, size_t len) 
+{
     if (isFirstPacket) {
         Serial.println("OTA начата");
         md5.begin();
