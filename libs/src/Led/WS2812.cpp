@@ -309,6 +309,8 @@ void WS2812::SetState(LedMode Mode)
    r1 = Mode.r;
    g1 = Mode.g;
    b1 = Mode.b;
+
+   if (State.Mode == STATIC) FlagOneOn = true;
 }
 
 void WS2812::SetBlind(uint8_t Blind)

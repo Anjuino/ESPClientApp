@@ -14,7 +14,7 @@ class BME280Sensor: public SensorT, public SensorH {
 
       void Init() { bme.begin(0x76); };
       
-      float GetTemperature() override { return bme.readTemperature(); };
+      float GetTemperature() override { return bme.readTemperature() - 2.5; };
       float GetHumidity()    override { return bme.readHumidity(); };
 };
 
