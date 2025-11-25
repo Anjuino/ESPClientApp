@@ -204,7 +204,9 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
         case WStype_DISCONNECTED:
         { 
             Serial.println("Отключился от сервера");
-            ResetOtaUpdate(); 
+            ResetOtaUpdate();
+            
+            // Тут считать попытки и сигнализировать о том что нужно пробовать подключиться к резервному серверу.
             break;
         }
 
@@ -239,7 +241,7 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
 void Device::WebSocketInit()
 {
-    Client.beginSSL("orangepi.tail322823.ts.net", 443, "/smarthome/ws", nullptr, "arduino");
+    Client.beginSSL(Settings.ServerIp, 443, "/smarthome/ws", nullptr, "arduino");
     
     //Client.begin(Settings.ServerIp, 7777, "/ws");
     

@@ -37,7 +37,7 @@ void DeviceTelemetry::Init()
     //AddSensor(static_cast<SensorH*>(new BME280Sensor()),    SensorTypes::Humidity);
     AddSensor(static_cast<SensorT*>(new DHTSensor()),    SensorTypes::Temperature);
     AddSensor(static_cast<SensorH*>(new DHTSensor()),    SensorTypes::Humidity);
-    //AddSensor(static_cast<SensorCO2*>(new ENS160Sensor()),  SensorTypes::CO2);
+   // AddSensor(static_cast<SensorCO2*>(new ENS160Sensor()),  SensorTypes::CO2);
 }
 
 

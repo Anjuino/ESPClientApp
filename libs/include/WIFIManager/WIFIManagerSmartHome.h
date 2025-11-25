@@ -8,7 +8,7 @@ class WIFIManagerSmartHome:public WIFIManager {
         struct{
             bool SettingIsEmpty;
             char Token[20];
-            char ServerIp[15];
+            char ServerIp[32];
         } DeviceSmartHomeSetting;
 
         void GetToken();

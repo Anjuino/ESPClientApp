@@ -43,7 +43,7 @@ class Device {
       struct DeviceSmartHomeSetting{
         bool SettingIsEmpty;
         char Token[20];
-        char ServerIp[15];
+        char ServerIp[32];
       };
 
     protected:
