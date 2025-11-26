@@ -51,20 +51,43 @@ void Device::ParseIncomingMessage(JsonDocument doc, String TypeMesseage)
 {
     if(TypeMesseage == "StartOTA")      RequestFirmware();
     if(TypeMesseage == "Reboot")        ESP.restart();
-    if(TypeMesseage == "UpdateToken")   UpdateToken(doc);
+    if(TypeMesseage == "GetSetting")    SendSetting();
+    if(TypeMesseage == "SetSetting")    WriteSetting(doc);
 }
 
-void Device::UpdateToken(JsonDocument doc)
+void Device::SendSetting()
 {
-    if (doc.containsKey("Token") && doc["Token"].is<int>()) {
+    JsonDocument doc;
+
+    // Заполняем объект данными
+    doc["Token"]        = Settings.Token;
+    doc["IpServer"]     = Settings.ServerIp;
+    doc["TypeMesseage"] = "Controller_Setting";
+
+    SendMesseageToServer(doc);
+}
+
+void Device::WriteSetting(JsonDocument doc)
+{
+    if (doc.containsKey("Token") && doc["Token"].is<String>()) {
         const char* tokenStr = doc["Token"];
         strncpy(Settings.Token, tokenStr, sizeof(Settings.Token) - 1);
         Settings.Token[sizeof(Settings.Token) - 1] = '\0';
-        EEPROM.put(SettingsAddress, Settings);
-        EEPROM.commit();
-        delay(1000);
-        ESP.restart();
     }
+
+    if (doc.containsKey("IpServer") && doc["IpServer"].is<String>()) {
+        const char* ipStr = doc["IpServer"];
+        strncpy(Settings.ServerIp, ipStr, sizeof(Settings.ServerIp) - 1);
+        Settings.ServerIp[sizeof(Settings.ServerIp) - 1] = '\0';
+    }
+
+    doc["TypeMesseage"] = "SettingWrite";
+    SendMesseageToServer(doc);
+
+    delay(2000);
+    EEPROM.put(SettingsAddress, Settings);
+    EEPROM.commit();
+    ESP.restart();
 }
 
 void Device::ResetOtaUpdate() 

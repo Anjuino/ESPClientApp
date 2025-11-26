@@ -83,6 +83,7 @@ class Device {
       void RequestNextFirmwarePacket();
       void SendOtaFinish();
       void ResetOtaUpdate();
-      void UpdateToken(JsonDocument doc);
+      void SendSetting();
+      void WriteSetting(JsonDocument doc);
 };
 
