@@ -18,9 +18,9 @@ void DeviceLedController::ParseIncomingMessage(JsonDocument doc, String TypeMess
 
    if (TypeMesseage == "GetState") SendState();
 
-   if (TypeMesseage == "SetState") SetState(doc);
-   if (TypeMesseage == "SetSpeed") SetSpeed(doc);
-   if (TypeMesseage == "SetBrightness") SetBrightness(doc);
+   if (TypeMesseage == "SetStateToLed")      SetState(doc);
+   if (TypeMesseage == "SetSpeedToLed")      SetSpeed(doc);
+   if (TypeMesseage == "SetBrightnessToLed") SetBrightness(doc);
 
    if (TypeMesseage == "UpdateSettingLed") UpdateSettingLed(doc);
    if (TypeMesseage == "GetSettingLed") SendLedSetting();
