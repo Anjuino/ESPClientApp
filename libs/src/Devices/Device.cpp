@@ -264,10 +264,12 @@ void Device::HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length)
 
 void Device::WebSocketInit()
 {
-    Client.beginSSL(Settings.ServerIp, 443, "/smarthome/ws", nullptr, "arduino");
-    
-    //Client.begin(Settings.ServerIp, 7777, "/ws");
-    
+    if (strncmp(Settings.ServerIp, "192.168", 7) == 0) {
+        Client.begin(Settings.ServerIp, 7777, "/ws");
+    } else {
+        Client.beginSSL(Settings.ServerIp, 443, "/smarthome/ws", nullptr, "arduino");
+    }
+        
     Client.enableHeartbeat(30000, 25000, 5); // ping каждые 30 сек, timeout 25 сек
 
     Client.onEvent([this](WStype_t type, uint8_t* payload, size_t length) {

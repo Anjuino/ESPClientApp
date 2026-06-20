@@ -31,7 +31,7 @@ class Device {
       void WebSocketInit();
       void HandlerWebSocket(WStype_t type, uint8_t* payload, size_t length);
       
-      uint32_t GetChipId() 
+      uint64_t GetChipId() 
       {
       #ifdef ESP32 
          return ESP.getEfuseMac();

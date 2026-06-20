@@ -7,16 +7,17 @@ const char Index[] PROGMEM = R"=(
   <link rel="stylesheet" href="styles.css">  
 </head>
 <body onload>
-	<div id="loading">Загрузка данных...</div>
-    <div id="content">
-		<h1>Настройка Wi-Fi</h1>
-		<form id="wifiForm">
+  <div id="loading">Загрузка данных...</div>
+  <div id="content">
+    <h1>Настройка Wi-Fi</h1>
+    <form id="wifiForm">
       <label for="ssid">Сеть:</label><br>
       <select id="ssid" name="ssid" style="display: none;"></select>
       <input type="text" id="manualSsid" name="manualSsid" style="display: none;" placeholder="Введите SSID вручную"><br><br>
       <label for="password">Пароль:</label><br>
       <input type="password" id="password" name="password"><br><br>
-		</form>
+    </form>
+    
     <h1>Настройка подключения к серверу</h1>
     <form id="TgBotForm">
       <label for="Token">Токен:</label><br>
@@ -24,10 +25,31 @@ const char Index[] PROGMEM = R"=(
       <label for="Ip">Ip:</label><br>
       <input type="text" id="Ip" name="Ip"><br><br>
     </form>
-		<button type="button" onclick="configureWifi()">Сохранить</button>
-	</div>		
+    
+    <button type="button" onclick="configureWifi()">Сохранить</button>
+    
+    <hr class="ota-divider">
+    <br>
+    <h1>Обновление прошивки</h1>
+    <div class="ota-section">
+      <input type="file" id="otaFile" accept=".bin" style="font-size: 33px;">
+      <div id="otaStatus"></div>
+    </div>
+    <button type="button" class="ota-button" onclick="updateFirmware()">Обновить</button>
+
+    <hr class="ota-divider">
+    <br>
+    <button type="button" onclick="Restart()">Перезагрузка</button>
+  </div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Через 5 секунд показываем контент в любом случае
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+      }, 5000);
+      
+      // Загружаем данные, если получится - покажем раньше
       Promise.all([GetWifiData(), ScanWifi(), GetToken(), GetIp()])
         .then(() => {
           document.getElementById('loading').style.display = 'none';
@@ -35,8 +57,7 @@ const char Index[] PROGMEM = R"=(
         })
         .catch(error => {
           console.error('Ошибка при загрузке данных:', error);
-          document.getElementById('loading').textContent = 
-            'Ошибка загрузки';
+          document.getElementById('loading').textContent = 'Ошибка загрузки';
         });
     });
     
@@ -57,7 +78,8 @@ const char Index[] PROGMEM = R"=(
           data.forEach(network => {
             const option = document.createElement("option");
             option.value = network.SSID;
-            option.textContent = network.SSID;
+            // Добавляем уровень сигнала в скобках
+            option.textContent = `${network.SSID} (${network.RSSI} dBm)`;
             select.appendChild(option);
           });
           select.style.display = "block";
@@ -156,6 +178,58 @@ const char Index[] PROGMEM = R"=(
 
       if (IsDataInput) fetch(`/RegDeviceData?SSID=${ssid}&Password=${password}&Token=${token}&Ip=${ip}`);
     }
+
+    function updateFirmware() {
+      const fileInput = document.getElementById('otaFile');
+      const statusDiv = document.getElementById('otaStatus');
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        statusDiv.textContent = 'Выберите файл прошивки';
+        statusDiv.style.color = 'red';
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('firmware', fileInput.files[0]);
+      
+      statusDiv.textContent = 'Загрузка...';
+      statusDiv.style.color = 'blue';
+      
+      fetch('/update', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          statusDiv.textContent = 'Обновление успешно! Перезагрузка...';
+          statusDiv.style.color = 'green';
+          setTimeout(() => location.reload(), 5000);
+        } else {
+          statusDiv.textContent = 'Ошибка обновления';
+          statusDiv.style.color = 'red';
+        }
+      })
+      .catch(error => {
+        statusDiv.textContent = 'Ошибка: ' + error.message;
+        statusDiv.style.color = 'red';
+      });
+    }
+
+    function Restart() {
+      fetch('/restart')
+      .then(response => {
+          if (response.ok) {
+              alert("Устройство будет перезагружено");
+              setTimeout(() => location.reload(), 5000);
+          } else {
+              alert("Ошибка перезагрузки");
+          }
+      })
+      .catch(error => {
+          alert("Ошибка: " + error.message);
+      });
+    }
+    
   </script>
 </body>
 </html>

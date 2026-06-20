@@ -283,17 +283,27 @@ void WS2812::Chaos(uint32_t wait)
 {
    static uint8_t randcolor = 0;
    for (uint16_t i = 0; i < Led.numPixels (); i++) {
-   randcolor = random (10);
-      if (randcolor == 0) Led.setPixelColor (i, random (256), 0, 0);
-      if (randcolor == 1) Led.setPixelColor (i, 0, random (256), 0);
-      if (randcolor == 2) Led.setPixelColor (i, 0, 0, random (256));
-      if (randcolor == 3) Led.setPixelColor (i, random (256), random (256), 0);
-      if (randcolor == 4) Led.setPixelColor (i, random (256), 0, random (256));
-      if (randcolor == 5) Led.setPixelColor (i, 0, random (256), random (256));
-      if (randcolor == 6) Led.setPixelColor (i, random (256), random (256), random (256));
-      if (randcolor == 7) Led.setPixelColor (i, random (128), random (256), random (128));
-      if (randcolor == 8) Led.setPixelColor (i, random (128), random (256), random (256));
-      if (randcolor == 9) Led.setPixelColor (i, random (256), random (128), random (128));
+      randcolor = random (20);
+      if (randcolor == 0)  Led.setPixelColor (i, random (256), 0, 0);
+      if (randcolor == 1)  Led.setPixelColor (i, 0, random (256), 0);
+      if (randcolor == 2)  Led.setPixelColor (i, 0, 0, random (256));
+      if (randcolor == 3)  Led.setPixelColor (i, random (256), random (256), 0);
+      if (randcolor == 4)  Led.setPixelColor (i, random (256), 0, random (256));
+      if (randcolor == 5)  Led.setPixelColor (i, 0, random (256), random (256));
+      if (randcolor == 6)  Led.setPixelColor (i, random (256), random (256), random (256));
+      if (randcolor == 7)  Led.setPixelColor (i, random (128), random (256), random (128));
+      if (randcolor == 8)  Led.setPixelColor (i, random (128), random (256), random (256));
+      if (randcolor == 9)  Led.setPixelColor (i, random (256), random (128), random (128));
+      if (randcolor == 10) Led.setPixelColor (i, random (256), 0, 0);
+      if (randcolor == 11) Led.setPixelColor (i, 0, random (128), 0);
+      if (randcolor == 12) Led.setPixelColor (i, 0, 0, random (128));
+      if (randcolor == 13) Led.setPixelColor (i, random (128), random (256), 0);
+      if (randcolor == 14) Led.setPixelColor (i, random (256), 0, random (128));
+      if (randcolor == 15) Led.setPixelColor (i, 0, random (256), random (256));
+      if (randcolor == 16) Led.setPixelColor (i, random (128), random (256), random (128));
+      if (randcolor == 17) Led.setPixelColor (i, random (128), random (128), random (128));
+      if (randcolor == 18) Led.setPixelColor (i, random (128), random (64), random (128));
+      if (randcolor == 19) Led.setPixelColor (i, random (256), random (32), random (16));
    }
    Led.show ();
    vTaskDelay(pdMS_TO_TICKS(300 - (10 * wait)));  
@@ -322,7 +332,7 @@ void WS2812::SetBlind(uint8_t Blind)
 
 void WS2812::UpdateLedCount(uint16_t LedCount)
 {
-   if (LedCount > 0 && LedCount < 600) Led.updateLength(LedCount);
+   if (LedCount > 0 && LedCount < 1000) Led.updateLength(LedCount);
 }
 
 void WS2812::UpdateSetting(LedSetting iSetting)
@@ -347,6 +357,7 @@ void WS2812::Loop()
       }
       case NOTHING:
       {
+         vTaskDelay(100);
          break;
       }
       
@@ -410,6 +421,7 @@ void WS2812::Loop()
             SetColor(State.r, State.g, State.b);
             FlagOneOn = false;
          }
+         vTaskDelay(100);
          break;
       }
    }

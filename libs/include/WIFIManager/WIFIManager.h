@@ -1,9 +1,11 @@
 #ifdef ESP32
   #include <WiFi.h>
   #include <WebServer.h>
+  #include <Update.h>
 #else
   #include <ESP8266WiFi.h>
   #include "ESP8266WebServer.h"
+  #include <ESP8266httpUpdate.h>
 #endif
 
 #include <EEPROM.h>
@@ -46,7 +48,9 @@ class WIFIManager {
 
       void ScanWifi();
       void GetWifiData();
-
+      void OTAUpload();
+      void EspRestart();
+      
       #ifdef ESP32
         WebServer *GetServer(void) {return &server;};
       #else

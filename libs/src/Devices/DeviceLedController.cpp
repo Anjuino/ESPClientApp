@@ -42,8 +42,8 @@ void DeviceLedController::AppStart()
 void DeviceLedController::Init()
 {
    Device::Init();
-   Led.Init(AddressSettings, 27, SensorDetectedMove);
-   //xTaskCreatePinnedToCore(LedCode, "LedCode", 1024 * 20, this, 10, &Led_task, 1);
+   //Led.Init(AddressSettings, 4, SensorDetectedMove);
+   xTaskCreatePinnedToCore(LedCode, "LedCode", 1024 * 20, this, 18, &Led_task, 1);
 }
 
 void DeviceLedController::SetState(JsonDocument doc)
@@ -186,7 +186,7 @@ void DeviceLedController::Loop()
 {
    Device::Loop();
 
-   Led.Loop();
+   //Led.Loop();
 }
 
 #endif

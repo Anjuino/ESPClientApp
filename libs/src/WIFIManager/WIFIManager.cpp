@@ -1,7 +1,7 @@
 #include "WIFIManager/WIFIManager.h"
 
 WIFIManager::WIFIManager()
-{   
+{
 
 }
 
@@ -49,7 +49,7 @@ void WIFIManager::Start(bool IsNeedEEPROM)
         break;
       }
     }
-                                                                                      
+
     // Не смог подключится к сети. Создаю точку доступа и запускаю сервер
     if (!IsConnect) {
         Serial.println("Запускаю точку доступа");
@@ -93,6 +93,13 @@ void WIFIManager::GetWifiData()
     server.send(200, "application/json", JSONAnswer);
 }
 
+void WIFIManager::EspRestart()
+{
+    server.send(200, "text/plain", "OK");
+    delay(1000);
+    ESP.restart();
+}
+
 void WIFIManager::ScanWifi()
 {
     int netCount = WiFi.scanNetworks();
@@ -134,14 +141,60 @@ void WIFIManager::RegDeviceData(bool IsNeedRestart)
   server.send (200, "text/plane", "OK");
 }
 
+void WIFIManager::OTAUpload() {
+    HTTPUpload& upload = server.upload();
+    
+    if (upload.status == UPLOAD_FILE_START) {
+        Serial.printf("Начало OTA обновления: %s\n", upload.filename.c_str());
+        #if defined(ESP8266)
+            size_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+            if (!Update.begin(maxSketchSpace)) {
+        #else
+            if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+        #endif
+            Update.printError(Serial);
+            server.send(500, "text/plain", "OTA начать не удалось");
+            return;
+        }
+        
+        Serial.println("OTA инициализировано");
+    } 
+    else if (upload.status == UPLOAD_FILE_WRITE) {
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+            Update.printError(Serial);
+            server.send(500, "text/plain", "Ошибка записи OTA");
+            return;
+        }
+        Serial.printf("Записано: %d байт\n", upload.totalSize);
+    }
+    else if (upload.status == UPLOAD_FILE_END) {
+        if (Update.end(true)) {
+            Serial.printf("OTA успешно завершено. Размер: %d байт\n", upload.totalSize);
+            server.send(200, "text/plain", "Обновление успешно");
+            delay(1000);
+            ESP.restart();
+        } else {
+            Update.printError(Serial);
+            server.send(500, "text/plain", "Ошибка завершения OTA");
+        }
+    }
+}
+
 void WIFIManager::StartServer()
 {
-    server.on("/styles.css", [this]() {GetCSS();});
-    server.on("/", [this]() {StartPage();});
-    server.on("/RegDeviceData", [this]() {RegDeviceData();});  // Обработчик входящих данных
-    server.on("/ScanWifi", [this]() {ScanWifi();});            // Сканирование WIFI
+    server.on("/styles.css", [this]() { GetCSS(); });
+    server.on("/", [this]() { StartPage(); });
+    server.on("/RegDeviceData", [this]() { RegDeviceData(); });  // Обработчик входящих данных
+    server.on("/ScanWifi", [this]() { ScanWifi();} );            // Сканирование WIFI
 
-    server.on("/GetWifiData", [this]() {GetWifiData();});      // Запрос на получение данных о сохраненной сети
+    server.on("/update", HTTP_POST, 
+        [this]() { server.send(200, "text/plain", "OK"); },
+        [this]() { this->OTAUpload(); }
+    );
+
+    server.on("/GetWifiData", [this]() { GetWifiData();} );      // Запрос на получение данных о сохраненной сети
+
+    server.on("/restart", [this]() { EspRestart();} );
 
     server.begin();
 }
