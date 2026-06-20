@@ -43,21 +43,18 @@ const char Index[] PROGMEM = R"=(
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Через 5 секунд показываем контент в любом случае
-      setTimeout(() => {
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('content').style.display = 'block';
-      }, 5000);
-      
-      // Загружаем данные, если получится - покажем раньше
-      Promise.all([GetWifiData(), ScanWifi(), GetToken(), GetIp()])
+      ScanWifi()
         .then(() => {
+          return Promise.all([
+            GetWifiData(),
+            GetToken(),
+            GetIp()
+          ]);
+        })
+        .catch(() => {})
+        .finally(() => {
           document.getElementById('loading').style.display = 'none';
           document.getElementById('content').style.display = 'block';
-        })
-        .catch(error => {
-          console.error('Ошибка при загрузке данных:', error);
-          document.getElementById('loading').textContent = 'Ошибка загрузки';
         });
     });
     
@@ -98,20 +95,30 @@ const char Index[] PROGMEM = R"=(
       const manualSsid = document.getElementById('manualSsid');
       
       return fetch(`/GetWifiData`)
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-      })
-      .then(data => {
-        if (data.SSID) {
-          if (ssid.style.display !== "none") {
-            ssid.value = data.SSID;
-          } else {
-            manualSsid.value = data.SSID;
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          return response.json();
+        })
+        .then(data => {
+          if (data.SSID) {
+            const options = Array.from(ssid.options).map(opt => opt.value);
+            const networkExists = options.includes(data.SSID);
+            
+            if (networkExists && ssid.options.length > 0) {
+              ssid.style.display = "block";
+              manualSsid.style.display = "none";
+              ssid.value = data.SSID;
+            } else {
+              ssid.style.display = "none";
+              manualSsid.style.display = "block";
+              manualSsid.value = data.SSID;
+            }
           }
-        }
-        password.value = data.Password;
-      })
+          password.value = data.Password || '';
+        })
+        .catch(error => {
+          console.error('GetWifiData ошибка:', error);
+        });
     }
 	
     function GetToken() {

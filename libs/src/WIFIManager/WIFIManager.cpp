@@ -62,6 +62,10 @@ void WIFIManager::Start(bool IsNeedEEPROM)
             const char* ApName = "ESP8266";
         #endif
 
+        #ifdef ESP32
+            WiFi.mode(WIFI_AP);
+        #endif
+        
         WiFi.softAP(ApName, "password");
 
         StartServer();
@@ -102,20 +106,24 @@ void WIFIManager::EspRestart()
 
 void WIFIManager::ScanWifi()
 {
+    #ifdef ESP32
+        if (WiFi.getMode() == WIFI_AP) {
+            WiFi.mode(WIFI_AP_STA);
+            delay(1000);
+            WiFi.disconnect();
+        }
+    #endif
+
     int netCount = WiFi.scanNetworks();
     String JSONAnswer = "["; 
 
     for (int i = 0; i < netCount; i++) {
         JSONAnswer += "{"; 
-
         JSONAnswer += "\"SSID\":\"" + String(WiFi.SSID(i)) + "\",";
         JSONAnswer += "\"RSSI\":\"" + String(WiFi.RSSI(i)) + "\"";
-
         JSONAnswer += "}"; 
-
         if (i < netCount - 1) JSONAnswer += ",";
     }
-
     JSONAnswer += "]"; 
 
     server.send(200, "application/json", JSONAnswer);
