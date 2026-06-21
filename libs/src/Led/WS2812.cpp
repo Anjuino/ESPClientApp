@@ -1,21 +1,6 @@
 #ifdef ESP32
 #include "Led/WS2812.h"
 
-#define NOTHING     0
-
-#define RAINBOW     1
-#define RUNSTR      2
-#define STROBE      3
-#define RANDOMLIGHT 4
-#define SPARK       5
-#define FADE        6
-#define RUNLIGHT    7
-#define CHAOS       8
-#define RUNSTR2     9
-
-#define STATIC     249
-#define OFF        250
-
 void WS2812::Init(uint16_t SettingsAddress, uint8_t Pin, bool IsSensorDetected)
 {
    this->SettingsAddress = SettingsAddress;
@@ -24,12 +9,15 @@ void WS2812::Init(uint16_t SettingsAddress, uint8_t Pin, bool IsSensorDetected)
    if (this->SettingsAddress) {
       Led.setPin(Pin);
       Led.updateType(NEO_GRB + NEO_KHZ800);
-      Led.setBrightness(State.Blind);
       
       EEPROM.get(this->SettingsAddress, Setting);
       if (Setting.LedCount > 1000) Setting.LedCount = 50;
       
       Led.updateLength(Setting.LedCount);
+
+      initPreferences();
+
+      loadState();
    }
 }
 
@@ -49,11 +37,6 @@ void WS2812::SetColor(uint8_t r, uint8_t g, uint8_t b)
       Led.setPixelColor (i, r, g, b);
    }
    Led.show ();
-}
-
-void WS2812::SetSpeed(uint8_t SpeedRecv) 
-{
-  State.Speed = SpeedRecv;
 }
 
 uint32_t WS2812::Wheel(byte WheelPos) 
@@ -321,13 +304,24 @@ void WS2812::SetState(LedMode Mode)
    b1 = Mode.b;
 
    if (State.Mode == STATIC) FlagOneOn = true;
+
+   saveState();
 }
 
 void WS2812::SetBlind(uint8_t Blind)
 {
    State.Blind = Blind;
    Led.setBrightness (State.Blind * 2);
-   Led.show ();
+   Led.show();
+
+   saveState();
+}
+
+void WS2812::SetSpeed(uint8_t SpeedRecv) 
+{
+   State.Speed = SpeedRecv;
+
+   saveState();
 }
 
 void WS2812::UpdateLedCount(uint16_t LedCount)

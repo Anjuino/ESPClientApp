@@ -1,9 +1,9 @@
 #ifdef ESP32
-inline const char build[] = "1.0.2.207";
+inline const char build[] = "1.0.2.221";
 #endif
 
 #ifdef ESP8266
-inline const char build[] = "1.0.2.207";
+inline const char build[] = "1.0.2.221";
 #endif
 
 

@@ -1,7 +1,23 @@
 #pragma once
 #ifdef ESP32
 
+#define NOTHING     0
+
+#define RAINBOW     1
+#define RUNSTR      2
+#define STROBE      3
+#define RANDOMLIGHT 4
+#define SPARK       5
+#define FADE        6
+#define RUNLIGHT    7
+#define CHAOS       8
+#define RUNSTR2     9
+
+#define STATIC     249
+#define OFF        250
+
 #include <Adafruit_NeoPixel.h>
+#include <Preferences.h>
 #include "EEPROM.h"
 
 struct LedMode {
@@ -25,6 +41,8 @@ class WS2812 {
       LedMode State;
       LedSetting Setting;
 
+      Preferences preferences;
+      
       bool FlagOneOn = true;
 
       uint8_t r1 = 255;
@@ -55,7 +73,6 @@ class WS2812 {
       Adafruit_NeoPixel Led; 
 
    public:
-
       WS2812()  {};
       ~WS2812() {};
 
@@ -70,6 +87,35 @@ class WS2812 {
 
       LedSetting GetSetting() {return Setting;};
       LedMode GetState() {return State;};
+
+      void initPreferences() {
+         preferences.begin("led", false);
+      }
+         
+      void saveState() {
+         preferences.putBytes("state", &State, sizeof(State));
+      }
+         
+      void loadState() {
+         size_t readSize = preferences.getBytes("state", &State, sizeof(State));
+         if (readSize != sizeof(State)) {
+            State.Mode = 0;
+            State.r = 0;
+            State.g = 0;
+            State.b = 0;
+            State.Speed = 10;
+            State.Blind = 50;
+            saveState();
+         }
+         
+         r1 = State.r;
+         g1 = State.g;
+         b1 = State.b;
+         if (State.Mode == STATIC) FlagOneOn = true;
+
+         Led.setBrightness(State.Blind * 2);
+         
+      }
 };
 
 #endif

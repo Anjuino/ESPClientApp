@@ -104,14 +104,22 @@ const char Index[] PROGMEM = R"=(
             const options = Array.from(ssid.options).map(opt => opt.value);
             const networkExists = options.includes(data.SSID);
             
-            if (networkExists && ssid.options.length > 0) {
-              ssid.style.display = "block";
-              manualSsid.style.display = "none";
-              ssid.value = data.SSID;
-            } else {
+            if (ssid.options.length === 0) {
               ssid.style.display = "none";
               manualSsid.style.display = "block";
               manualSsid.value = data.SSID;
+            } else if (!networkExists) {
+              const option = document.createElement("option");
+              option.value = data.SSID;
+              option.textContent = `${data.SSID} (текущая)`;
+              ssid.appendChild(option);
+              ssid.value = data.SSID;
+              ssid.style.display = "block";
+              manualSsid.style.display = "none";
+            } else {
+              ssid.value = data.SSID;
+              ssid.style.display = "block";
+              manualSsid.style.display = "none";
             }
           }
           password.value = data.Password || '';
