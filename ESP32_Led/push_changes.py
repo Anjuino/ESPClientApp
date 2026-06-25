@@ -6,7 +6,7 @@ def push_to_repo():
     print("Добавление локальных файлов в общие файлы библиотек")
     
     project_path = os.getcwd()  # Текущая директория
-    libs_path = "C:/ESPClientApp/libs"
+    libs_path = os.path.join(os.path.dirname(project_path), "libs")
     
     # Копируем изменения из include проекта в общий репозиторий
     include_src = os.path.join(project_path, "include")
